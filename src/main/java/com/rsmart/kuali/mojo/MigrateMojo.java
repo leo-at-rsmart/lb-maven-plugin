@@ -5,27 +5,21 @@ import org.apache.maven.plugin.MojoExecutionException;
 
 import org.liquibase.maven.plugins.AbstractLiquibaseUpdateMojo;
 
+import liquibase.exception.LiquibaseException;
+import liquibase.Liquibase;
+
+import java.io.File;
+import java.net.URL;
 import java.util.Properties;
 
 /**
  * Migrate Liquibase changelogs
  *
- *
+ * @author Leo Przybylski
  * @goal migrate
  */
 public class MigrateMojo extends AbstractLiquibaseUpdateMojo {
-    public static final String URL_PROP       = "url";
-    public static final String CLASSPATH_PROP = "classpath";
-    public static final String USERNAME_PROP  = "username";
-    public static final String PASSWORD_PROP  = "password";
-    public static final String SCHEMA_PROP    = "schema";
-    public static final String DRIVER_PROP    = "driver";
 
-    /**
-     * @parameter
-     */
-    private String contexts;
-    
     /**
      * @parameter default-value="${project.basedir}/target/changelogs"
      */
@@ -39,23 +33,31 @@ public class MigrateMojo extends AbstractLiquibaseUpdateMojo {
     /**
      * @parameter default-value="${project.basedir}/src/main/changelogs"
      */
-    private File changeLogPath;
+    private File updatePath;
     
     /**
-     * @parameter
+     * Whether or not to perform a drop on the database before executing the change.
+     * @parameter expression="${liquibase.dropFirst}" default-value="false"
      */
-    private Boolean dropFirst;
+    protected boolean dropFirst;
     
-    /**
-     *
-     * @parameter
-     */
-    private String propertiesFile;
+    @Override
+    protected void doUpdate(Liquibase liquibase) throws LiquibaseException {
+        if (dropFirst) {
+            liquibase.dropAll();
+        }
+        
+        if (changesToApply > 0) {
+            liquibase.update(changesToApply, contexts);
+        } else {
+            liquibase.update(contexts);
+        }
+    }
+    
+    @Override
+    protected void printSettings(String indent) {
+        super.printSettings(indent);
+        getLog().info(indent + "drop first? " + dropFirst);
 
-    /**
-     *
-     * @parameter
-     */
-    private Properties properties;
-    
+    }
 }
