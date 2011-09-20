@@ -28,6 +28,8 @@ package com.rsmart.kuali.mojo;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.project.MavenProject;
+import org.apache.maven.artifact.manager.WagonManager;
 
 import org.liquibase.maven.plugins.AbstractLiquibaseUpdateMojo;
 
@@ -36,6 +38,7 @@ import liquibase.exception.LiquibaseException;
 import liquibase.serializer.ChangeLogSerializer;
 import liquibase.parser.core.xml.LiquibaseEntityResolver;
 import liquibase.parser.core.xml.XMLChangeLogSAXParser;
+import org.apache.maven.wagon.authentication.AuthenticationInfo;
 
 import liquibase.util.xml.DefaultXmlWriter;
 
@@ -44,8 +47,14 @@ import org.tmatesoft.svn.core.SVNDirEntry;
 import org.tmatesoft.svn.core.SVNDepth;
 import org.tmatesoft.svn.core.SVNException;
 import org.tmatesoft.svn.core.SVNURL;
+import org.tmatesoft.svn.core.auth.ISVNAuthenticationManager;
+import org.tmatesoft.svn.core.io.SVNRepository;
+import org.tmatesoft.svn.core.io.SVNRepositoryFactory;
+import org.tmatesoft.svn.core.wc.ISVNOptions;
+import org.tmatesoft.svn.core.wc.SVNWCUtil;
 import org.tmatesoft.svn.core.wc.SVNClientManager;
 import org.tmatesoft.svn.core.wc.SVNWCClient;
+import org.tmatesoft.svn.core.internal.io.dav.DAVRepositoryFactory;
 
 import org.w3c.dom.*;
 
@@ -75,6 +84,34 @@ import static org.tmatesoft.svn.core.wc.SVNRevision.WORKING;
 public class MigrateMojo extends AbstractLiquibaseUpdateMojo {
     public static final String DEFAULT_CHANGELOG_PATH = "src/main/changelogs";
 
+    protected String svnUsername;
+    protected String svnPassword;
+
+    /**
+     * The server id in settings.xml to use when authenticating with.
+     *
+     * @parameter expression="${lb.svnServer}"
+     */
+    protected String svnServer;
+    
+
+    /**
+     * The Maven Wagon manager to use when obtaining server authentication details.
+     * @component role="org.apache.maven.artifact.manager.WagonManager"
+     * @required
+     * @readonly
+     */
+    protected WagonManager wagonManager;
+
+    /**
+     * The Maven project that plugin is running under.
+     *
+     * @parameter expression="${project}"
+     * @required
+     * @readonly
+     */
+    protected MavenProject project;
+
     /**
      * Specifies the change log file to use for Liquibase. No longer needed with updatePath.
      * @parameter expression="${liquibase.changeLogFile}"
@@ -88,7 +125,7 @@ public class MigrateMojo extends AbstractLiquibaseUpdateMojo {
     protected File changeLogSavePath;
 
     /**
-     * @parameter
+     * @parameter expression="${lb.changeLogTagUrl}"
      */
     protected URL changeLogTagUrl;
 
@@ -105,30 +142,43 @@ public class MigrateMojo extends AbstractLiquibaseUpdateMojo {
      */
     protected boolean dropFirst;
 
+    protected File getBasedir() {
+        return project.getBasedir();
+    }
+
     protected SVNURL getChangeLogTagUrl() throws SVNException {
         if (changeLogTagUrl == null) {
-            return SVNURL.fromFile(new File(getBasedir()));
+            return getProjectSvnUrlFrom(getBasedir()).appendPath("tags", true);
         }
-        return SVNURL.parseURIEncoded(changeLogTagUrl.toString()).appendPath("tags", true);
+        return SVNURL.parseURIEncoded(changeLogTagUrl.toString());
     }
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
-        if (!requiresUpdate()) {
+        if (svnServer != null) {
+            final AuthenticationInfo info = wagonManager.getAuthenticationInfo(svnServer);
+            if (info != null) {
+                svnUsername = info.getUserName();
+                svnPassword = info.getPassword();
+            }
+        }
+        DAVRepositoryFactory.setup();
+
+        if (!isUpdateRequired()) {
             return;
         }
+
 
         try {
             for (final SVNURL tag : getTagUrls()) {
                 final String tagBasePath = getLocalTagPath(tag);
                 
-                final File tagPath = new File(tagBasePath, DEFAULT_CHANGELOG_PATH);
+                final File tagPath = new File(tagBasePath, "update");
                 tagPath.mkdirs();
                 
-                final SVNURL changeLogUrl = tag.appendPath(DEFAULT_CHANGELOG_PATH, true);
+                final SVNURL changeLogUrl = tag.appendPath(DEFAULT_CHANGELOG_PATH + "/update", true);
                 SVNClientManager.newInstance().getUpdateClient()
-                    .doExport(changeLogUrl, tagPath, null, null, null, true, SVNDepth.INFINITY);
-                
+                    .doExport(changeLogUrl, tagPath, HEAD, HEAD, null, true, SVNDepth.INFINITY);
             }
         }
         catch (Exception e) {
@@ -154,8 +204,9 @@ public class MigrateMojo extends AbstractLiquibaseUpdateMojo {
         return changeLogSavePath + File.separator + tagPath.substring(tagPath.lastIndexOf("/") + 1);
     }
 
-    protected boolean requiresUpdate() throws MojoExecutionException {
+    protected boolean isUpdateRequired() throws MojoExecutionException {
         try {
+            getLog().info("Comparing " + getCurrentRevision() + " to " + getLocalRevision());
             return getCurrentRevision() > getLocalRevision();
         }
         catch (Exception e) {
@@ -163,16 +214,32 @@ public class MigrateMojo extends AbstractLiquibaseUpdateMojo {
         }
     }
 
-    protected String getBasedir() {
-        return System.getProperty("basedir");
+    protected SVNURL getProjectSvnUrlFrom(final File path) throws SVNException {
+        SVNURL retval = getWCClient().doInfo(getBasedir(), HEAD).getURL();
+        String removeToken = null;
+        if (retval.getPath().indexOf("/branches") > -1) {
+            removeToken = "/branches";
+        }
+        else if (retval.getPath().indexOf("/tags") > -1) {
+            removeToken = "/tags";
+        }
+        else if (retval.getPath().indexOf("/trunk") > -1) {
+            removeToken = "/trunk";
+        }
+
+        getLog().info("Checking path " + retval.getPath() + " for token " + removeToken);
+        while (retval.getPath().indexOf(removeToken) > -1) {
+            retval = retval.removePathTail();
+        }
+        return retval;
     }
 
     protected Long getCurrentRevision() throws SVNException {
-        return getWCClient().doInfo(new File(getBasedir()), WORKING).getCommittedRevision().getNumber();
+        return getWCClient().doInfo(getBasedir(), HEAD).getCommittedRevision().getNumber();
     }
 
     protected Long getLocalRevision() throws SVNException {
-        return getWCClient().doInfo(new File(getBasedir()), WORKING).getRevision().getNumber();
+        return getWCClient().doInfo(getBasedir(), WORKING).getRevision().getNumber();
     }
 
     protected Long getTagRevision(final String tag) throws SVNException {
@@ -181,11 +248,14 @@ public class MigrateMojo extends AbstractLiquibaseUpdateMojo {
 
     protected Collection<SVNURL> getTagUrls() throws SVNException {
         final Collection<SVNURL> retval = new ArrayList<SVNURL>();
-        SVNClientManager.newInstance().getLogClient()
-            .doList(getChangeLogTagUrl(), null, null, false, false, 
+        getLog().debug("Looking up tags in " + getChangeLogTagUrl().toString());
+        clientManager().getLogClient()
+            .doList(getChangeLogTagUrl(), HEAD, HEAD, false, false, 
                     new ISVNDirEntryHandler() {
                         public void handleDirEntry(SVNDirEntry dirEntry) throws SVNException {
-                            if (dirEntry.getRevision() >= getLocalRevision()) {
+                            if (dirEntry.getRevision() >= getLocalRevision()
+                                && dirEntry.getPath().trim().length() > 0) {
+                                getLog().debug("Adding tag '" + dirEntry.getPath() + "'");
                                 retval.add(dirEntry.getURL());
                             }
                         }
@@ -194,8 +264,7 @@ public class MigrateMojo extends AbstractLiquibaseUpdateMojo {
     }
 
     protected SVNWCClient getWCClient() {
-        SVNClientManager clientManager = SVNClientManager.newInstance();
-        return clientManager.getWCClient();
+        return clientManager().getWCClient();
     }
 
     protected Collection<File> scanForChangelogs(final File searchPath) {
@@ -216,8 +285,16 @@ public class MigrateMojo extends AbstractLiquibaseUpdateMojo {
         return retval;
     }
 
+    protected SVNClientManager clientManager() {
+        ISVNAuthenticationManager authManager = SVNWCUtil.createDefaultAuthenticationManager("lprzybylski", "entr0py0");
+        ISVNOptions options = SVNWCUtil.createDefaultOptions(true);       
+        SVNClientManager clientManager = SVNClientManager.newInstance(options, authManager);
+        
+        return clientManager;
+    }
+
     protected void generateUpdateLog(final File changeLogFile, final Collection<File> changelogs) throws FileNotFoundException, IOException {
-        changeLogFile.mkdirs();
+        changeLogFile.getParentFile().mkdirs();
 
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder documentBuilder;
@@ -239,7 +316,7 @@ public class MigrateMojo extends AbstractLiquibaseUpdateMojo {
 		doc.appendChild(changeLogElement);
 
         for (final File changelog : changelogs) {
-            doc.appendChild(includeNode(doc, changelog));
+            doc.getDocumentElement().appendChild(includeNode(doc, changelog));
         }
 
         new DefaultXmlWriter().write(doc, new FileOutputStream(changeLogFile));
@@ -257,15 +334,11 @@ public class MigrateMojo extends AbstractLiquibaseUpdateMojo {
             dropAll(liquibase);
         }
 
-        getLog().info("Faking update ");
-        
-        /*
         if (changesToApply > 0) {
             liquibase.update(changesToApply, contexts);
         } else {
             liquibase.update(contexts);
         }
-        */
     }
 
     /**
