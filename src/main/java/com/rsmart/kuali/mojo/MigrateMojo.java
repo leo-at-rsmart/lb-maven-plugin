@@ -206,7 +206,7 @@ public class MigrateMojo extends AbstractLiquibaseUpdateMojo {
 
     protected boolean isUpdateRequired() throws MojoExecutionException {
         try {
-            getLog().info("Comparing " + getCurrentRevision() + " to " + getLocalRevision());
+            getLog().debug("Comparing " + getCurrentRevision() + " to " + getLocalRevision());
             return getCurrentRevision() > getLocalRevision();
         }
         catch (Exception e) {
@@ -227,7 +227,7 @@ public class MigrateMojo extends AbstractLiquibaseUpdateMojo {
             removeToken = "/trunk";
         }
 
-        getLog().info("Checking path " + retval.getPath() + " for token " + removeToken);
+        getLog().debug("Checking path " + retval.getPath() + " for token " + removeToken);
         while (retval.getPath().indexOf(removeToken) > -1) {
             retval = retval.removePathTail();
         }
