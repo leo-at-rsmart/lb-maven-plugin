@@ -54,6 +54,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.io.File;
+import java.io.FilenameFilter;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.InputStream;
@@ -76,6 +77,7 @@ public class LiquibaseTestMojo extends AbstractLiquibaseChangeLogMojo {
     public static final String DEFAULT_CHANGELOG_PATH = "src/main/changelogs";
     public static final String DEFAULT_UPDATE_FILE    = "target/changelogs/update.xml";
     public static final String DEFAULT_UPDATE_PATH    = "target/changelogs/update";
+    public static final String DEFAULT_LBPROP_PATH    = "target/test-classes/liquibase/";
     public static final String TEST_ROLLBACK_TAG      = "test";
 
     /**
@@ -283,11 +285,28 @@ public class LiquibaseTestMojo extends AbstractLiquibaseChangeLogMojo {
         }
     }
 
+    protected File[] getLiquibasePropertiesFiles() throws MojoExecutionException {
+        try {
+            final File[] retval = new File(getBasedir(), DEFAULT_LBPROP_PATH).listFiles(new FilenameFilter() {
+                    public boolean accept(final File dir, final String name) {
+                        return name.endsWith(".properties");
+                    }
+                });
+            if (retval == null) {
+                throw new NullPointerException();
+            }            
+            return retval;
+        }
+        catch (Exception e) {
+            getLog().warn("Unable to get liquibase properties files ");
+            return new File[0];
+            // throw new MojoExecutionException("Unable to get liquibase properties files ", e);
+        }
+    }
+
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
         changeLogFile = DEFAULT_UPDATE_FILE;
-        doFieldHack();
-
         try {
             Method meth = AbstractLiquibaseMojo.class.getDeclaredMethod("processSystemProperties");
             meth.setAccessible(true);
@@ -296,13 +315,27 @@ public class LiquibaseTestMojo extends AbstractLiquibaseChangeLogMojo {
         catch (Exception e) {
             e.printStackTrace();
         }
+        super.project = this.project;
 
         ClassLoader artifactClassLoader = getMavenArtifactClassLoader();
-        configureFieldsAndValues(getFileOpener(artifactClassLoader));
+        final File[] propertyFiles = getLiquibasePropertiesFiles();
         
-        doFieldHack();
-
-        super.execute();
+        // execute change logs on each database
+        for (final File props : propertyFiles) {
+            try {
+                propertyFile = props.getCanonicalPath();
+                doFieldHack();
+                
+                configureFieldsAndValues(getFileOpener(artifactClassLoader));
+                
+                doFieldHack();
+            }
+            catch (Exception e) {
+                throw new MojoExecutionException(e.getMessage(), e);
+            }
+            
+            super.execute();
+        }
     }
 
     @Override
