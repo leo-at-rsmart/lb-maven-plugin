@@ -333,8 +333,12 @@ public class MigrateMojo extends AbstractLiquibaseUpdateMojo {
         }
 
 
+        boolean shouldLocalUpdate = false;
         try {
-            for (final SVNURL tag : getTagUrls()) {
+            final Collection<SVNURL> svnurls = getTagUrls();
+            shouldLocalUpdate = (svnurls == null || svnurls.size() < 1);
+
+            for (final SVNURL tag : svnurls) {
                 final String tagBasePath = getLocalTagPath(tag);
                 
                 final File tagPath = new File(tagBasePath, "update");
@@ -350,8 +354,13 @@ public class MigrateMojo extends AbstractLiquibaseUpdateMojo {
         }
 
         changeLogFile = new File(changeLogSavePath, "update.xml").getPath();
+        File changeLogSearchPath = changeLogSavePath;
+
+        if (shouldLocalUpdate) {
+            changeLogSavePath = new File(changeLogSavePath, "update");
+        }
         
-        final Collection<File> changelogs = scanForChangelogs(changeLogSavePath);
+        final Collection<File> changelogs = scanForChangelogs(changeLogSearchPath);
         
         try {
             generateUpdateLog(new File(changeLogFile), changelogs);
@@ -371,7 +380,9 @@ public class MigrateMojo extends AbstractLiquibaseUpdateMojo {
     protected boolean isUpdateRequired() throws MojoExecutionException {
         try {
             getLog().debug("Comparing " + getCurrentRevision() + " to " + getLocalRevision());
-            return getCurrentRevision() > getLocalRevision();
+            final String[] updates = new File(DEFAULT_CHANGELOG_PATH + File.separator + "update").list();
+            boolean hasUpdates = updates != null && updates.length > 0;
+            return getCurrentRevision() > getLocalRevision() || (hasUpdates);
         }
         catch (Exception e) {
             throw new MojoExecutionException("Could not compare local and remote revisions ", e);
