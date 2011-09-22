@@ -156,7 +156,7 @@ public class LiquibaseTestMojo extends AbstractLiquibaseChangeLogMojo {
      * changes on a database that is not local to the machine that the user is current
      * executing the plugin on.
      *
-     * @parameter expression="${liquibase.promptOnNonLocalDatabase}" default-value="true"
+     * @parameter expression="${liquibase.promptOnNonLocalDatabase}" default-value="false"
      */
     protected boolean promptOnNonLocalDatabase;
 
@@ -207,7 +207,7 @@ public class LiquibaseTestMojo extends AbstractLiquibaseChangeLogMojo {
      * the Maven plugin configuration. By default if a property is explicity specified it is
      * not overridden if it also appears in the properties file.
      *
-     * @parameter expression="${liquibase.propertyFileWillOverride}" default-value="false"
+     * @parameter expression="${liquibase.propertyFileWillOverride}" default-value="true"
      */
     protected boolean propertyFileWillOverride;
 
