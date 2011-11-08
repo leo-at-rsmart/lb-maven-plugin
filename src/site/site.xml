@@ -16,7 +16,7 @@
     <body>
         <menu name="rSmart Liquibase Maven Plugin">
           <item name="Overview" href="index.html"/>
-          <item name="Goals" href="usage.html"/>
+          <item name="Goals" href="goals.html"/>
           <item name="Usage" href="usage.html"/>
           <item name="API" href="apidocs/"/>
           <item name="Screencasts" href="screencasts.html"/>
