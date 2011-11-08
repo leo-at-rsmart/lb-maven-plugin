@@ -4,31 +4,26 @@ great user documentation and developer information, and
 we're really excited that you've taken the time to visit
 this site.
 
-What is lbcopy
+What is lb-maven-plugin
 
-  This is a collection of ant tasks that used for copying (migrating)
-changes from one database to another using liquibase. The goal of this
-project is to provide an out-of-the-box reference implementation for
-projects to use liquibase for migrating data in their build processes.
+  lb-maven-plugin is another {{{http://www.liquibase.org}Liquibase}}
+maven plugin with an emphasis on development migration and environment
+upgrades. It adheres to a strict convention policy to simplify
+configuration. There isn't very much that can be done about the
+convention, so if you don't agree with it, you probably don't want to
+use this plugin. For information about the convention, read the
+{{{usage.html}Usage}} page.
 
-Why Ant
+* Migrations for developers
 
-  Ant seemed like a clear enough solution because so many Kuali
-projects are already using it. Further, though Ant is used, this
-project uses Ivy. This way, maven can be levereged to build the ant
-tasks and handle dependencies at runtime. This way, we're not actually
-at a disadvantage with Ivy.
+  Normal liquibase plugins do not consider that developers need to be
+able to easily bring their databases to the correct version. This
+plugin will allow developers to easily do that with the migrate
+goal. The plugin connects with Maven SCM configuration to retrieve
+missing changelogs from SCM and play them back.
 
-Anything else
+* Environment upgrades
 
-  Since we're using Liquibase, we are utilizing the extension
-infrastructure as heavily as possible. lbcopy does make minor
-modifications to the Liquibase codebase to function easier and
-simplify configuration. However, one of the core ideals is to modify
-as little as possible, and develop extensions for others to use
-within the Liquibase community itself.
-
-  That is why we have developed a companion project called
-lbext. Check that one out as well.
-
-  Please have a look around. We've got some great examples around here
+  Much the same way that migrations work for developers, environments
+can easily be upgrade in part by the convention that ensures where
+changelogs can be found, and how they are structured to work together.
