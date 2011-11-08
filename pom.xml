@@ -6,6 +6,39 @@
   <packaging>maven-plugin</packaging>
   <version>0.0.1</version>
   <name>Maven Liquibase Migrate Plugin</name>
+  <description>Liquibase Maven Plugin with emphasis on structured development and conventions.</description>
+
+	<url>http://r351574nc3.github.com/lbext</url>
+	<organization>
+		<name>Leo Przybylski</name>
+		<url>http://kualigan.blogspot.com</url>
+	</organization>
+
+    <developers>
+      <developer>
+        <id>leo</id>
+        <name>Leo Przybylski</name>
+        <email>leo@rsmart.com</email>
+        <url>http://kualigan.blogspot.com</url>
+        <organization>rsmart</organization>
+        <organizationUrl>http://www.rsmart.com</organizationUrl>
+        <roles>
+          <role>developer</role>
+        </roles>
+        <timezone>-7</timezone>
+        <properties>
+          <picUrl>http://www.gravatar.com/avatar/6be04114e185b6fa626a0ee530db34e4.png</picUrl>
+        </properties>
+      </developer>
+    </developers>
+
+	<licenses>
+		<license>
+			<name>Leo Przybylski Community License 2.0</name>
+			<url>http://www.opensource.org/licenses/ecl2.txt</url>
+			<distribution>manual</distribution>
+		</license>
+	</licenses>
 
   <dependencies>
     <dependency>
@@ -34,4 +67,17 @@
     <liquibase.version>2.0.2</liquibase.version>
     <svnkit.version>1.3.5</svnkit.version>
   </properties>
+
+    <scm>
+      <connection>scm:git:git://github.com/r351574nc3/lb-maven-plugin.git</connection>
+      <developerConnection>scm:git:git://github.com/r351574nc3/lb-maven-plugin.git</developerConnection>
+      <url>http://www.github.com/r351574nc3/lb-maven-plugin</url>
+    </scm>
+    
+    <distributionManagement>
+      <site>
+        <id>github-project-site</id>
+        <url>gitsite:git@github.com/r351574nc3/lb-maven-plugin</url>
+      </site>
+    </distributionManagement>
 </project>
