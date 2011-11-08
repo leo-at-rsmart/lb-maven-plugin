@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<pmd-cpd>
+<duplication lines="135" tokens="575">
+<file line="365" path="/Users/leo/projects/git/lb-maven-plugin/src/main/java/com/rsmart/kuali/mojo/LiquibaseTestMojo.java"/>
+<file line="551" path="/Users/leo/projects/git/lb-maven-plugin/src/main/java/com/rsmart/kuali/mojo/MigrateMojo.java"/>
+<codefragment>
+<![CDATA[
+        getLog().info(indent + "drop first? " + dropFirst);
+
+    }
+
+    /**
+     * Parses a properties file and sets the assocaited fields in the plugin.
+     *
+     * @param propertiesInputStream The input stream which is the Liquibase properties that
+     *                              needs to be parsed.
+     * @throws org.apache.maven.plugin.MojoExecutionException
+     *          If there is a problem parsing
+     *          the file.
+     */
+    protected void parsePropertiesFile(InputStream propertiesInputStream)
+            throws MojoExecutionException {
+        if (propertiesInputStream == null) {
+            throw new MojoExecutionException("Properties file InputStream is null.");
+        }
+        Properties props = new Properties();
+        try {
+            props.load(propertiesInputStream);
+        }
+        catch (IOException e) {
+            throw new MojoExecutionException("Could not load the properties Liquibase file", e);
+        }
+
+        for (Iterator it = props.keySet().iterator(); it.hasNext();) {
+            String key = null;
+            try {
+                key = (String) it.next();
+                Field field = getDeclaredField(this.getClass(), key);
+
+                if (propertyFileWillOverride) {
+                    setFieldValue(field, props.get(key).toString());
+                } else {
+                    if (!isCurrentFieldValueSpecified(field)) {
+                        getLog().debug("  properties file setting value: " + field.getName());
+                        setFieldValue(field, props.get(key).toString());
+                    }
+                }
+            }
+            catch (Exception e) {
+                getLog().info("  '" + key + "' in properties file is not being used by this "
+                        + "task.");
+            }
+        }
+    }
+
+    /**
+     * This method will check to see if the user has specified a value different to that of
+     * the default value. This is not an ideal solution, but should cover most situations in
+     * the use of the plugin.
+     *
+     * @param f The Field to check if a user has specified a value for.
+     * @return <code>true</code> if the user has specified a value.
+     */
+    private boolean isCurrentFieldValueSpecified(Field f) throws IllegalAccessException {
+        Object currentValue = f.get(this);
+        if (currentValue == null) {
+            return false;
+        }
+
+        Object defaultValue = getDefaultValue(f);
+        if (defaultValue == null) {
+            return currentValue != null;
+        } else {
+            // There is a default value, check to see if the user has selected something other
+            // than the default
+            return !defaultValue.equals(f.get(this));
+        }
+    }
+
+    private Object getDefaultValue(Field field) throws IllegalAccessException {
+        List<Field> allFields = new ArrayList<Field>();
+        allFields.addAll(Arrays.asList(getClass().getDeclaredFields()));
+        allFields.addAll(Arrays.asList(AbstractLiquibaseMojo.class.getDeclaredFields()));
+
+        for (Field f : allFields) {
+            if (f.getName().equals(field.getName() + DEFAULT_FIELD_SUFFIX)) {
+                f.setAccessible(true);
+                return f.get(this);
+            }
+        }
+        return null;
+    }
+
+    
+    /**
+     * Recursively searches for the field specified by the fieldName in the class and all
+     * the super classes until it either finds it, or runs out of parents.
+     * @param clazz The Class to start searching from.
+     * @param fieldName The name of the field to retrieve.
+     * @return The {@link Field} identified by the field name.
+     * @throws NoSuchFieldException If the field was not found in the class or any of its
+     * super classes.
+     */
+    protected Field getDeclaredField(Class clazz, String fieldName)
+        throws NoSuchFieldException {
+        getLog().debug("Checking " + clazz.getName() + " for '" + fieldName + "'");
+        try {
+            Field f = clazz.getDeclaredField(fieldName);
+            
+            if (f != null) {
+                return f;
+            }
+        }
+        catch (Exception e) {
+        }
+        
+        while (clazz.getSuperclass() != null) {        
+            clazz = clazz.getSuperclass();
+            getLog().debug("Checking " + clazz.getName() + " for '" + fieldName + "'");
+            try {
+                Field f = clazz.getDeclaredField(fieldName);
+                
+                if (f != null) {
+                    return f;
+                }
+            }
+            catch (Exception e) {
+            }
+        }
+
+        throw new NoSuchFieldException("The field '" + fieldName + "' could not be "
+                                       + "found in the class of any of its parent "
+                                       + "classes.");
+    }
+
+    private void setFieldValue(Field field, String value) throws IllegalAccessException {
+        if (field.getType().equals(Boolean.class) || field.getType().equals(boolean.class)) {
+            field.set(this, Boolean.valueOf(value));
+        } else {
+            field.set(this, value);
+        }
+    }
+]]>
+</codefragment>
+</duplication>
+<duplication lines="36" tokens="224">
+<file line="516" path="/Users/leo/projects/git/lb-maven-plugin/src/main/java/com/rsmart/kuali/mojo/LiquibaseTestMojo.java"/>
+<file line="469" path="/Users/leo/projects/git/lb-maven-plugin/src/main/java/com/rsmart/kuali/mojo/MigrateMojo.java"/>
+<codefragment>
+<![CDATA[
+    }
+
+    protected void generateUpdateLog(final File changeLogFile, final Collection<File> changelogs) throws FileNotFoundException, IOException {
+        changeLogFile.getParentFile().mkdirs();
+
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+		DocumentBuilder documentBuilder;
+		try {
+			documentBuilder = factory.newDocumentBuilder();
+		}
+		catch(ParserConfigurationException e) {
+			throw new RuntimeException(e);
+		}
+		documentBuilder.setEntityResolver(new LiquibaseEntityResolver());
+
+		Document doc = documentBuilder.newDocument();
+		Element changeLogElement = doc.createElementNS(XMLChangeLogSAXParser.getDatabaseChangeLogNameSpace(), "databaseChangeLog");
+
+		changeLogElement.setAttribute("xmlns", XMLChangeLogSAXParser.getDatabaseChangeLogNameSpace());
+		changeLogElement.setAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
+		changeLogElement.setAttribute("xsi:schemaLocation", "http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-"+ XMLChangeLogSAXParser.getSchemaVersion()+ ".xsd");
+
+		doc.appendChild(changeLogElement);
+
+        for (final File changelog : changelogs) {
+            doc.getDocumentElement().appendChild(includeNode(doc, changelog));
+        }
+
+        new DefaultXmlWriter().write(doc, new FileOutputStream(changeLogFile));
+    }
+
+    protected Element includeNode(final Document parentChangeLog, final File changelog) throws IOException {
+        final Element retval = parentChangeLog.createElementNS(XMLChangeLogSAXParser.getDatabaseChangeLogNameSpace(), "include");
+        retval.setAttribute("file", changelog.getCanonicalPath());
+        return retval;
+    }
+]]>
+</codefragment>
+</duplication>
+<duplication lines="16" tokens="111">
+<file line="271" path="/Users/leo/projects/git/lb-maven-plugin/src/main/java/com/rsmart/kuali/mojo/LiquibaseTestMojo.java"/>
+<file line="287" path="/Users/leo/projects/git/lb-maven-plugin/src/main/java/com/rsmart/kuali/mojo/MigrateMojo.java"/>
+<codefragment>
+<![CDATA[
+        return SVNURL.parseURIEncoded(changeLogTagUrl.toString());
+    }
+
+    protected void doFieldHack() {
+        for (final Field field : getClass().getDeclaredFields()) {
+            try {
+                final Field parentField = getDeclaredField(getClass().getSuperclass(), field.getName());
+                if (parentField != null) {
+                    getLog().debug("Setting " + field.getName() + " in " + parentField.getDeclaringClass().getName() + " to " + field.get(this));
+                    parentField.set(this, field.get(this));
+                }
+            }
+            catch (Exception e) {
+            }
+        }
+    }
+]]>
+</codefragment>
+</duplication>
+<duplication lines="21" tokens="100">
+<file line="498" path="/Users/leo/projects/git/lb-maven-plugin/src/main/java/com/rsmart/kuali/mojo/LiquibaseTestMojo.java"/>
+<file line="443" path="/Users/leo/projects/git/lb-maven-plugin/src/main/java/com/rsmart/kuali/mojo/MigrateMojo.java"/>
+<codefragment>
+<![CDATA[
+    }
+
+    protected Collection<File> scanForChangelogs(final File searchPath) {
+        final Collection<File> retval = new ArrayList<File>();
+        
+        if (searchPath.getName().endsWith("update")) {
+            return Arrays.asList(searchPath.listFiles());
+        }
+        
+        if (searchPath.isDirectory()) {
+            for (final File file : searchPath.listFiles()) {
+                if (file.isDirectory()) {
+                    retval.addAll(scanForChangelogs(file));
+                }
+            }
+        }
+        
+        return retval;
+    }
+
+    protected SVNClientManager clientManager() {
+]]>
+</codefragment>
+</duplication>
+</pmd-cpd>

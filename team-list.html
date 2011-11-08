@@ -274,7 +274,7 @@ if (window.jstiming) window.jstiming.load.tick('headEnd');
 <div class='content'>
 <div class='menu-block-wrapper menu-block-3 menu-name-main-menu parent-mlid-0 menu-level-3'>
          <ul class="menu">
-                                <li class="leaf active-trail active menu-mlid-680">
+                                <li class="leaf menu-mlid-680">
                     <a href="index.html" title="Overview">Overview</a>
     </li>
                           <li class="leaf menu-mlid-680">
@@ -315,7 +315,23 @@ if (window.jstiming) window.jstiming.load.tick('headEnd');
      field-label-hidden'><div class='field-items'><div class='field-item
                                                        even'
                                                        property='content:encoded'>
-      <p>Welcome to the lbcopy Project, we hope you enjoy your time on this project site. We've tried to assemble some great user documentation and developer information, and we're really excited that you've taken the time to visit this site.</p><div class="section"><h2>What is lb-maven-plugin<a name="What_is_lb-maven-plugin"></a></h2><p>lb-maven-plugin is another <a class="externalLink" href="http://www.liquibase.org">Liquibase</a> maven plugin with an emphasis on development migration and environment upgrades. It adheres to a strict convention policy to simplify configuration. There isn't very much that can be done about the convention, so if you don't agree with it, you probably don't want to use this plugin. For information about the convention, read the <a href="#usage.html">Usage</a> page.</p><div class="section"><h3>Migrations for developers<a name="Migrations_for_developers"></a></h3><p>Normal liquibase plugins do not consider that developers need to be able to easily bring their databases to the correct version. This plugin will allow developers to easily do that with the migrate goal. The plugin connects with Maven SCM configuration to retrieve missing changelogs from SCM and play them back.</p></div><div class="section"><h3>Environment upgrades<a name="Environment_upgrades"></a></h3><p>Much the same way that migrations work for developers, environments can easily be upgrade in part by the convention that ensures where changelogs can be found, and how they are structured to work together.</p></div></div>
+      <div class="section"><h2>The Team<a name="The_Team"></a></h2><a name="The_Team"></a><p>A successful project requires many people to play many roles. Some members write code or documentation, while others are valuable as testers, submitting patches and suggestions.</p><p>The team is comprised of Members and Contributors. Members have direct access to the source of a project and actively evolve the code-base. Contributors improve the project through submission of patches and suggestions to the Members. The number of Contributors to the project is unbounded. Get involved today. All contributions to the project are greatly appreciated.</p><div class="section"><h3>Members<a name="Members"></a></h3><a name="Members"></a><p>The following is a list of developers with commit privileges that have directly contributed to the project in one way or another.</p><table border="0" class="bodyTable"><tr class="a"><th>Id</th><th>Name</th><th>Email</th><th>URL</th><th>Organization</th><th>Organization URL</th><th>Roles</th><th>Time Zone</th><th>Actual Time (GMT)</th><th>Properties</th></tr><tr class="b"><td><a name="leo"></a>leo</td><td>Leo Przybylski</td><td><a class="externalLink" href="mailto:leo@rsmart.com">leo@rsmart.com</a></td><td><a class="externalLink" href="http://kualigan.blogspot.com">http://kualigan.blogspot.com</a></td><td>rsmart</td><td><a class="externalLink" href="http://www.rsmart.com">http://www.rsmart.com</a></td><td>developer</td><td>-7</td><td><span id="developer-0">-7</span></td><td>picUrl=http://www.gravatar.com/avatar/6be04114e185b6fa626a0ee530db34e4.png</td></tr></table></div><div class="section"><h3>Contributors<a name="Contributors"></a></h3><a name="Contributors"></a><p>There are no contributors listed for this project. Please check back again later.</p><script type="text/javascript">
+function offsetDate(id, offset) {
+    var now = new Date();
+    var nowTime = now.getTime();
+    var localOffset = now.getTimezoneOffset();
+    var developerTime = nowTime + ( offset * 60 * 60 * 1000 )+ ( localOffset * 60 * 1000 );
+    var developerDate = new Date(developerTime);
+
+    document.getElementById(id).innerHTML = developerDate;
+}
+
+function init(){
+    offsetDate('developer-0', '-7');
+}
+
+window.onLoad = init();
+</script></div></div>
 </div>
 
 </div></div>			</div>

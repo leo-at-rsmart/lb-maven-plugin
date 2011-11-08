@@ -274,7 +274,7 @@ if (window.jstiming) window.jstiming.load.tick('headEnd');
 <div class='content'>
 <div class='menu-block-wrapper menu-block-3 menu-name-main-menu parent-mlid-0 menu-level-3'>
          <ul class="menu">
-                                <li class="leaf active-trail active menu-mlid-680">
+                                <li class="leaf menu-mlid-680">
                     <a href="index.html" title="Overview">Overview</a>
     </li>
                           <li class="leaf menu-mlid-680">
@@ -315,7 +315,353 @@ if (window.jstiming) window.jstiming.load.tick('headEnd');
      field-label-hidden'><div class='field-items'><div class='field-item
                                                        even'
                                                        property='content:encoded'>
-      <p>Welcome to the lbcopy Project, we hope you enjoy your time on this project site. We've tried to assemble some great user documentation and developer information, and we're really excited that you've taken the time to visit this site.</p><div class="section"><h2>What is lb-maven-plugin<a name="What_is_lb-maven-plugin"></a></h2><p>lb-maven-plugin is another <a class="externalLink" href="http://www.liquibase.org">Liquibase</a> maven plugin with an emphasis on development migration and environment upgrades. It adheres to a strict convention policy to simplify configuration. There isn't very much that can be done about the convention, so if you don't agree with it, you probably don't want to use this plugin. For information about the convention, read the <a href="#usage.html">Usage</a> page.</p><div class="section"><h3>Migrations for developers<a name="Migrations_for_developers"></a></h3><p>Normal liquibase plugins do not consider that developers need to be able to easily bring their databases to the correct version. This plugin will allow developers to easily do that with the migrate goal. The plugin connects with Maven SCM configuration to retrieve missing changelogs from SCM and play them back.</p></div><div class="section"><h3>Environment upgrades<a name="Environment_upgrades"></a></h3><p>Much the same way that migrations work for developers, environments can easily be upgrade in part by the convention that ensures where changelogs can be found, and how they are structured to work together.</p></div></div>
+      
+  
+    <div class="section"><h2>lb:migrate<a name="lb:migrate"></a></h2>
+      <p><b>Full name</b>:</p>
+      <p>com.rsmart.kuali.tools:lb-maven-plugin:0.0.1:migrate</p>
+      <p><b>Description</b>:</p>
+      <div>Migrate Liquibase changelogs</div>
+      <p><b>Attributes</b>:</p>
+      <ul>
+        <li>Requires a Maven 2.0 project to be executed.</li>
+      </ul>
+      <div class="section"><h3>Optional Parameters<a name="Optional_Parameters"></a></h3>
+        <table class="bodyTable" border="0" align="left">
+          <tr class="a">
+            <th>Name</th>
+            <th>Type</th>
+            <th>Since</th>
+            <th>Description</th>
+          </tr>
+          <tr class="b">
+            <td><b><a href="#changeLogFile">changeLogFile</a></b></td>
+            <td><tt>String</tt></td>
+            <td><tt>-</tt></td>
+            <td>Specifies the change log file to use for Liquibase. No longer
+needed with updatePath.<br /></td>
+          </tr>
+          <tr class="a">
+            <td><b><a href="#changeLogSavePath">changeLogSavePath</a></b></td>
+            <td><tt>File</tt></td>
+            <td><tt>-</tt></td>
+            <td>(no description)<br /><b>Default value is</b>: <tt>${project.basedir}/target/changelogs</tt>.</td>
+          </tr>
+          <tr class="b">
+            <td><b><a href="#changeLogTagUrl">changeLogTagUrl</a></b></td>
+            <td><tt>URL</tt></td>
+            <td><tt>-</tt></td>
+            <td>(no description)<br /></td>
+          </tr>
+          <tr class="a">
+            <td><b><a href="#clearCheckSums">clearCheckSums</a></b></td>
+            <td><tt>boolean</tt></td>
+            <td><tt>-</tt></td>
+            <td>Flag for forcing the checksums to be cleared from teh
+DatabaseChangeLog table.<br /><b>Default value is</b>: <tt>false</tt>.</td>
+          </tr>
+          <tr class="b">
+            <td><b><a href="#databaseClass">databaseClass</a></b></td>
+            <td><tt>String</tt></td>
+            <td><tt>-</tt></td>
+            <td>The class to use as the database object.<br /></td>
+          </tr>
+          <tr class="a">
+            <td><b><a href="#defaultSchemaName">defaultSchemaName</a></b></td>
+            <td><tt>String</tt></td>
+            <td><tt>-</tt></td>
+            <td>The default schema name to use the for database connection.<br /></td>
+          </tr>
+          <tr class="b">
+            <td><b><a href="#driver">driver</a></b></td>
+            <td><tt>String</tt></td>
+            <td><tt>-</tt></td>
+            <td>The fully qualified name of the driver class to use to connect to
+the database.<br /></td>
+          </tr>
+          <tr class="a">
+            <td><b><a href="#dropFirst">dropFirst</a></b></td>
+            <td><tt>boolean</tt></td>
+            <td><tt>-</tt></td>
+            <td>Whether or not to perform a drop on the database before executing
+the change.<br /><b>Default value is</b>: <tt>false</tt>.</td>
+          </tr>
+          <tr class="b">
+            <td><b><a href="#emptyPassword">emptyPassword</a></b></td>
+            <td><tt>boolean</tt></td>
+            <td><tt>-</tt></td>
+            <td><b><b>Deprecated</b>. {0}.</b> Use an empty or null value for the password instead.<br /><b>Default value is</b>: <tt>false</tt>.</td>
+          </tr>
+          <tr class="a">
+            <td><b><a href="#includeArtifact">includeArtifact</a></b></td>
+            <td><tt>boolean</tt></td>
+            <td><tt>-</tt></td>
+            <td>Allows for the maven project artifact to be included in the class
+loader for obtaining the Liquibase property and DatabaseChangeLog
+files.<br /><b>Default value is</b>: <tt>true</tt>.</td>
+          </tr>
+          <tr class="b">
+            <td><b><a href="#includeTestOutputDirectory">includeTestOutputDirectory</a></b></td>
+            <td><tt>boolean</tt></td>
+            <td><tt>-</tt></td>
+            <td>Allows for the maven test output directory to be included in the
+class loader for obtaining the Liquibase property and
+DatabaseChangeLog files.<br /><b>Default value is</b>: <tt>true</tt>.</td>
+          </tr>
+          <tr class="a">
+            <td><b><a href="#logging">logging</a></b></td>
+            <td><tt>String</tt></td>
+            <td><tt>-</tt></td>
+            <td>Controls the level of logging from Liquibase when executing. The
+value can be &quot;all&quot;, &quot;finest&quot;, &quot;finer&quot;, &quot;fine&quot;, &quot;info&quot;, &quot;warning&quot;,
+&quot;severe&quot; or &quot;off&quot;. The value is case insensitive.<br /><b>Default value is</b>: <tt>INFO</tt>.</td>
+          </tr>
+          <tr class="b">
+            <td><b><a href="#password">password</a></b></td>
+            <td><tt>String</tt></td>
+            <td><tt>-</tt></td>
+            <td>The database password to use to connect to the specified database.<br /></td>
+          </tr>
+          <tr class="a">
+            <td><b><a href="#promptOnNonLocalDatabase">promptOnNonLocalDatabase</a></b></td>
+            <td><tt>boolean</tt></td>
+            <td><tt>-</tt></td>
+            <td>Controls the prompting of users as to whether or not they really
+want to run the changes on a database that is not local to the
+machine that the user is current executing the plugin on.<br /><b>Default value is</b>: <tt>true</tt>.</td>
+          </tr>
+          <tr class="b">
+            <td><b><a href="#propertyFile">propertyFile</a></b></td>
+            <td><tt>String</tt></td>
+            <td><tt>-</tt></td>
+            <td>The Liquibase properties file used to configure the Liquibase
+<tt>Liquibase</tt>.<br /></td>
+          </tr>
+          <tr class="a">
+            <td><b><a href="#propertyFileWillOverride">propertyFileWillOverride</a></b></td>
+            <td><tt>boolean</tt></td>
+            <td><tt>-</tt></td>
+            <td>Flag allowing for the Liquibase properties file to override any
+settings provided in the Maven plugin configuration. By default if
+a property is explicity specified it is not overridden if it also
+appears in the properties file.<br /><b>Default value is</b>: <tt>false</tt>.</td>
+          </tr>
+          <tr class="b">
+            <td><b><a href="#server">server</a></b></td>
+            <td><tt>String</tt></td>
+            <td><tt>-</tt></td>
+            <td>The server id in settings.xml to use when authenticating with.<br /></td>
+          </tr>
+          <tr class="a">
+            <td><b><a href="#svnServer">svnServer</a></b></td>
+            <td><tt>String</tt></td>
+            <td><tt>-</tt></td>
+            <td>The server id in settings.xml to use when authenticating with.<br /></td>
+          </tr>
+          <tr class="b">
+            <td><b><a href="#systemProperties">systemProperties</a></b></td>
+            <td><tt>Properties</tt></td>
+            <td><tt>-</tt></td>
+            <td>List of system properties to pass to the database.<br /></td>
+          </tr>
+          <tr class="a">
+            <td><b><a href="#updatePath">updatePath</a></b></td>
+            <td><tt>File</tt></td>
+            <td><tt>-</tt></td>
+            <td>Location of an update.xml<br /><b>Default value is</b>: <tt>${project.basedir}/src/main/changelogs</tt>.</td>
+          </tr>
+          <tr class="b">
+            <td><b><a href="#url">url</a></b></td>
+            <td><tt>String</tt></td>
+            <td><tt>-</tt></td>
+            <td>The Database URL to connect to for executing Liquibase.<br /></td>
+          </tr>
+          <tr class="a">
+            <td><b><a href="#username">username</a></b></td>
+            <td><tt>String</tt></td>
+            <td><tt>-</tt></td>
+            <td>The database username to use to connect to the specified database.<br /></td>
+          </tr>
+          <tr class="b">
+            <td><b><a href="#verbose">verbose</a></b></td>
+            <td><tt>boolean</tt></td>
+            <td><tt>-</tt></td>
+            <td>Controls the verbosity of the output from invoking the plugin.<br /><b>Default value is</b>: <tt>false</tt>.</td>
+          </tr>
+        </table>
+      </div>
+      <div class="section"><h3>Parameter Details<a name="Parameter_Details"></a></h3>
+        <p><b><a name="changeLogFile">changeLogFile</a>:</b></p>
+        <div>Specifies the change log file to use for Liquibase. No longer
+needed with updatePath.</div>
+        <ul>
+          <li><b>Type</b>: <tt>java.lang.String</tt></li>
+          <li><b>Required</b>: <tt>No</tt></li>
+          <li><b>Expression</b>: <tt>${liquibase.changeLogFile}</tt></li>
+        </ul><hr /><p><b><a name="changeLogSavePath">changeLogSavePath</a>:</b></p>
+        <div>(no description)</div>
+        <ul>
+          <li><b>Type</b>: <tt>java.io.File</tt></li>
+          <li><b>Required</b>: <tt>No</tt></li>
+          <li><b>Default</b>: <tt>${project.basedir}/target/changelogs</tt></li>
+        </ul><hr /><p><b><a name="changeLogTagUrl">changeLogTagUrl</a>:</b></p>
+        <div>(no description)</div>
+        <ul>
+          <li><b>Type</b>: <tt>java.net.URL</tt></li>
+          <li><b>Required</b>: <tt>No</tt></li>
+          <li><b>Expression</b>: <tt>${lb.changeLogTagUrl}</tt></li>
+        </ul><hr /><p><b><a name="clearCheckSums">clearCheckSums</a>:</b></p>
+        <div>Flag for forcing the checksums to be cleared from teh
+DatabaseChangeLog table.</div>
+        <ul>
+          <li><b>Type</b>: <tt>boolean</tt></li>
+          <li><b>Required</b>: <tt>No</tt></li>
+          <li><b>Expression</b>: <tt>${liquibase.clearCheckSums}</tt></li>
+          <li><b>Default</b>: <tt>false</tt></li>
+        </ul><hr /><p><b><a name="databaseClass">databaseClass</a>:</b></p>
+        <div>The class to use as the database object.</div>
+        <ul>
+          <li><b>Type</b>: <tt>java.lang.String</tt></li>
+          <li><b>Required</b>: <tt>No</tt></li>
+          <li><b>Expression</b>: <tt>${liquibase.databaseClass}</tt></li>
+        </ul><hr /><p><b><a name="defaultSchemaName">defaultSchemaName</a>:</b></p>
+        <div>The default schema name to use the for database connection.</div>
+        <ul>
+          <li><b>Type</b>: <tt>java.lang.String</tt></li>
+          <li><b>Required</b>: <tt>No</tt></li>
+          <li><b>Expression</b>: <tt>${liquibase.defaultSchemaName}</tt></li>
+        </ul><hr /><p><b><a name="driver">driver</a>:</b></p>
+        <div>The fully qualified name of the driver class to use to connect to
+the database.</div>
+        <ul>
+          <li><b>Type</b>: <tt>java.lang.String</tt></li>
+          <li><b>Required</b>: <tt>No</tt></li>
+          <li><b>Expression</b>: <tt>${liquibase.driver}</tt></li>
+        </ul><hr /><p><b><a name="dropFirst">dropFirst</a>:</b></p>
+        <div>Whether or not to perform a drop on the database before executing
+the change.</div>
+        <ul>
+          <li><b>Type</b>: <tt>boolean</tt></li>
+          <li><b>Required</b>: <tt>No</tt></li>
+          <li><b>Expression</b>: <tt>${liquibase.dropFirst}</tt></li>
+          <li><b>Default</b>: <tt>false</tt></li>
+        </ul><hr /><p><b><a name="emptyPassword">emptyPassword</a>:</b></p>
+        <div><b>Deprecated</b>. Use an empty or null value for the password instead.</div>
+        <div>Use an empty string as the password for the database connection.
+This should not be used along side the <tt>password</tt>
+setting.</div>
+        <ul>
+          <li><b>Type</b>: <tt>boolean</tt></li>
+          <li><b>Required</b>: <tt>No</tt></li>
+          <li><b>Expression</b>: <tt>${liquibase.emptyPassword}</tt></li>
+          <li><b>Default</b>: <tt>false</tt></li>
+        </ul><hr /><p><b><a name="includeArtifact">includeArtifact</a>:</b></p>
+        <div>Allows for the maven project artifact to be included in the class
+loader for obtaining the Liquibase property and DatabaseChangeLog
+files.</div>
+        <ul>
+          <li><b>Type</b>: <tt>boolean</tt></li>
+          <li><b>Required</b>: <tt>No</tt></li>
+          <li><b>Expression</b>: <tt>${liquibase.includeArtifact}</tt></li>
+          <li><b>Default</b>: <tt>true</tt></li>
+        </ul><hr /><p><b><a name="includeTestOutputDirectory">includeTestOutputDirectory</a>:</b></p>
+        <div>Allows for the maven test output directory to be included in the
+class loader for obtaining the Liquibase property and
+DatabaseChangeLog files.</div>
+        <ul>
+          <li><b>Type</b>: <tt>boolean</tt></li>
+          <li><b>Required</b>: <tt>No</tt></li>
+          <li><b>Expression</b>: <tt>${liquibase.includeTestOutputDirectory}</tt></li>
+          <li><b>Default</b>: <tt>true</tt></li>
+        </ul><hr /><p><b><a name="logging">logging</a>:</b></p>
+        <div>Controls the level of logging from Liquibase when executing. The
+value can be &quot;all&quot;, &quot;finest&quot;, &quot;finer&quot;, &quot;fine&quot;, &quot;info&quot;, &quot;warning&quot;,
+&quot;severe&quot; or &quot;off&quot;. The value is case insensitive.</div>
+        <ul>
+          <li><b>Type</b>: <tt>java.lang.String</tt></li>
+          <li><b>Required</b>: <tt>No</tt></li>
+          <li><b>Expression</b>: <tt>${liquibase.logging}</tt></li>
+          <li><b>Default</b>: <tt>INFO</tt></li>
+        </ul><hr /><p><b><a name="password">password</a>:</b></p>
+        <div>The database password to use to connect to the specified database.</div>
+        <ul>
+          <li><b>Type</b>: <tt>java.lang.String</tt></li>
+          <li><b>Required</b>: <tt>No</tt></li>
+          <li><b>Expression</b>: <tt>${liquibase.password}</tt></li>
+        </ul><hr /><p><b><a name="promptOnNonLocalDatabase">promptOnNonLocalDatabase</a>:</b></p>
+        <div>Controls the prompting of users as to whether or not they really
+want to run the changes on a database that is not local to the
+machine that the user is current executing the plugin on.</div>
+        <ul>
+          <li><b>Type</b>: <tt>boolean</tt></li>
+          <li><b>Required</b>: <tt>No</tt></li>
+          <li><b>Expression</b>: <tt>${liquibase.promptOnNonLocalDatabase}</tt></li>
+          <li><b>Default</b>: <tt>true</tt></li>
+        </ul><hr /><p><b><a name="propertyFile">propertyFile</a>:</b></p>
+        <div>The Liquibase properties file used to configure the Liquibase
+<tt>Liquibase</tt>.</div>
+        <ul>
+          <li><b>Type</b>: <tt>java.lang.String</tt></li>
+          <li><b>Required</b>: <tt>No</tt></li>
+          <li><b>Expression</b>: <tt>${liquibase.propertyFile}</tt></li>
+        </ul><hr /><p><b><a name="propertyFileWillOverride">propertyFileWillOverride</a>:</b></p>
+        <div>Flag allowing for the Liquibase properties file to override any
+settings provided in the Maven plugin configuration. By default if
+a property is explicity specified it is not overridden if it also
+appears in the properties file.</div>
+        <ul>
+          <li><b>Type</b>: <tt>boolean</tt></li>
+          <li><b>Required</b>: <tt>No</tt></li>
+          <li><b>Expression</b>: <tt>${liquibase.propertyFileWillOverride}</tt></li>
+          <li><b>Default</b>: <tt>false</tt></li>
+        </ul><hr /><p><b><a name="server">server</a>:</b></p>
+        <div>The server id in settings.xml to use when authenticating with.</div>
+        <ul>
+          <li><b>Type</b>: <tt>java.lang.String</tt></li>
+          <li><b>Required</b>: <tt>No</tt></li>
+          <li><b>Expression</b>: <tt>${liquibase.server}</tt></li>
+        </ul><hr /><p><b><a name="svnServer">svnServer</a>:</b></p>
+        <div>The server id in settings.xml to use when authenticating with.</div>
+        <ul>
+          <li><b>Type</b>: <tt>java.lang.String</tt></li>
+          <li><b>Required</b>: <tt>No</tt></li>
+          <li><b>Expression</b>: <tt>${lb.svnServer}</tt></li>
+        </ul><hr /><p><b><a name="systemProperties">systemProperties</a>:</b></p>
+        <div>List of system properties to pass to the database.</div>
+        <ul>
+          <li><b>Type</b>: <tt>java.util.Properties</tt></li>
+          <li><b>Required</b>: <tt>No</tt></li>
+        </ul><hr /><p><b><a name="updatePath">updatePath</a>:</b></p>
+        <div>Location of an update.xml</div>
+        <ul>
+          <li><b>Type</b>: <tt>java.io.File</tt></li>
+          <li><b>Required</b>: <tt>No</tt></li>
+          <li><b>Expression</b>: <tt>${lb.updatePath}</tt></li>
+          <li><b>Default</b>: <tt>${project.basedir}/src/main/changelogs</tt></li>
+        </ul><hr /><p><b><a name="url">url</a>:</b></p>
+        <div>The Database URL to connect to for executing Liquibase.</div>
+        <ul>
+          <li><b>Type</b>: <tt>java.lang.String</tt></li>
+          <li><b>Required</b>: <tt>No</tt></li>
+          <li><b>Expression</b>: <tt>${liquibase.url}</tt></li>
+        </ul><hr /><p><b><a name="username">username</a>:</b></p>
+        <div>The database username to use to connect to the specified database.</div>
+        <ul>
+          <li><b>Type</b>: <tt>java.lang.String</tt></li>
+          <li><b>Required</b>: <tt>No</tt></li>
+          <li><b>Expression</b>: <tt>${liquibase.username}</tt></li>
+        </ul><hr /><p><b><a name="verbose">verbose</a>:</b></p>
+        <div>Controls the verbosity of the output from invoking the plugin.</div>
+        <ul>
+          <li><b>Type</b>: <tt>boolean</tt></li>
+          <li><b>Required</b>: <tt>No</tt></li>
+          <li><b>Expression</b>: <tt>${liquibase.verbose}</tt></li>
+          <li><b>Default</b>: <tt>false</tt></li>
+        </ul>
+      </div>
+    </div>
+  
+
 </div>
 
 </div></div>			</div>
