@@ -34,7 +34,7 @@ changelogs can be found, and how they are structured to work together.
 
   You may recall from a
   {{{http://kualigan.blogspot.com/2010/04/kismet-game-changer-structuring-project.html}previous
-  blog post} the structure and style of Liquibase implementation I
+  blog post}} the structure and style of Liquibase implementation I
   recommend. To summarize, I recommend only publishing updates to your
   VCS. This makes it easier on developers and also eliminates
   confusion when making essentially the same change to multiple
