@@ -509,6 +509,8 @@ public class MigrateMojo extends AbstractLiquibaseUpdateMojo {
             dropAll(liquibase);
         }
 
+        liquibase.tag("undo");
+
         if (changesToApply > 0) {
             liquibase.update(changesToApply, contexts);
         } else {

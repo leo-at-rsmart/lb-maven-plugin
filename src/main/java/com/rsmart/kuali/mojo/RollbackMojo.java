@@ -276,7 +276,12 @@ public class RollbackMojo extends LiquibaseRollback {
 
         super.execute();
     }
-
+    
+    @Override
+    protected void performLiquibaseTask(Liquibase liquibase) throws LiquibaseException {
+        liquibase.rollback("undo", contexts);
+    }
+      
     
     @Override
     protected void printSettings(String indent) {
